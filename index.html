@@ -763,23 +763,21 @@
         let database = {};
         let chartInstances = {};
 
-       async function fetchLiveSheetData() {
+      async function fetchLiveSheetData() {
     try {
         const response = await fetch(APPS_SCRIPT_URL);
         if (!response.ok) throw new Error("Error en la respuesta del servidor");
         const liveData = await response.json();
         
-        // Verifica si la hoja trae datos válidos para la estructura del Dashboard
-        if (liveData && Object.keys(liveData).length > 0 && !liveData.error && (liveData["Informe semanal CO"] || liveData["CO"])) {
+        if (liveData && !liveData.error) {
             database = Object.assign({}, fallbackDatabase, liveData);
             document.getElementById('sync-status').textContent = "En sincronía con Google Sheets";
         } else {
-            throw new Error("Estructura de Google Sheets no compatible o sin datos cargados.");
+            throw new Error("Respuesta de Sheets no válida");
         }
     } catch (err) {
-        console.warn("Utilizando base de datos local respaldada:", err);
-        database = fallbackDatabase;
-        document.getElementById('sync-status').textContent = "Datos locales de respaldo";
+        console.warn("Error al cargar datos en vivo:", err);
+        document.getElementById('sync-status').textContent = "Error de conexión con Sheets";
     }
     updateDashboard();
 }
